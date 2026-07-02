@@ -104,6 +104,11 @@
       "disclaimer": "Don't do it! You will lose all funds!",
       "cancel": "No, Cancel",
       "burn": "Burn It!"
+    },
+    "incognito": {
+      "title": "Private browsing detected — you may lose your funds",
+      "body": "Burner Wallet stores your private key in browser local storage. In private/incognito mode, that data is erased when you close this tab. Open this page in a normal browser window, or back up your private key before closing.",
+      "download_hint": "If you close this tab, your browser will prompt you to download a backup of your private key."
     }
   }
 }

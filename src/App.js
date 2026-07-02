@@ -33,6 +33,7 @@ import Vendors from './components/Vendors';
 import RecentTransactions from './components/RecentTransactions';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
+import IncognitoWarning from './components/IncognitoWarning';
 import burnerlogo from './burnerwallet.png';
 import BurnWallet from './components/BurnWallet'
 import Exchange from './components/Exchange'
@@ -52,6 +53,7 @@ import eth from './ethereum.png';
 import dai from './dai.jpg';
 import xdai from './xdai.jpg';
 import Wyre from './services/wyre';
+import { detectIncognito } from './utils/incognito';
 
 let base64url = require('base64url')
 const EthCrypto = require('eth-crypto');
@@ -269,8 +271,10 @@ class App extends Component {
       hasUpdateOnce: false,
       badges: {},
       selectedBadge: false,
+      isIncognito: false,
     };
     this.alertTimeout = null;
+    this.beforeUnloadHandler = null;
 
     try{
       RNMessageChannel.on('json', update => {
@@ -308,6 +312,148 @@ class App extends Component {
     //console.log("STATE",state)
     return state;
   }
+  applyPathFromUrl(pathname, hash) {
+    if (!pathname) pathname = "";
+    if (!hash) hash = "";
+    console.log("applyPathFromUrl", pathname, pathname.length, hash);
+
+    if (pathname.indexOf("/pk") >= 0) {
+      let tempweb3 = new Web3();
+      let base64encodedPK = hash.replace("#", "");
+      let rawPK = tempweb3.utils.bytesToHex(base64url.toBuffer(base64encodedPK));
+      this.setState({ possibleNewPrivateKey: rawPK });
+      window.history.pushState({}, "", "/");
+      return;
+    }
+    if (pathname.length === 43) {
+      this.setState({ scannerState: { toAddress: pathname.substring(1) } }, () => {
+        this.changeView("send_to_address");
+      });
+      return;
+    }
+    if (pathname.length === 134) {
+      let parts = pathname.split(";");
+      let claimId = parts[0].replace("/", "");
+      let claimKey = parts[1];
+      console.log("DO CLAIM", claimId, claimKey);
+      this.setState({ claimId, claimKey });
+      window.history.pushState({}, "", "/");
+      return;
+    }
+    if (
+      (pathname.length >= 65 && pathname.length <= 67 && pathname.indexOf(";") < 0) ||
+      (hash.length >= 65 && hash.length <= 67 && hash.indexOf(";") < 0)
+    ) {
+      console.log("incoming private key");
+      let privateKey = pathname.replace("/", "");
+      if (hash) {
+        privateKey = hash;
+      }
+      privateKey = privateKey.replace("#", "");
+      if (privateKey.indexOf("0x") !== 0) {
+        privateKey = "0x" + privateKey;
+      }
+      this.setState({ possibleNewPrivateKey: privateKey }, () => {
+        this.dealWithPossibleNewPrivateKey();
+      });
+      window.history.pushState({}, "", "/");
+      return;
+    }
+    if (pathname.indexOf("/vendors;") === 0) {
+      this.changeView("vendors");
+      return;
+    }
+    let parts = pathname.split(";");
+    console.log("PARTS", parts);
+    if (parts.length >= 2) {
+      let sendToAddress = parts[0].replace("/", "");
+      let sendToAmount = parts[1];
+      let extraData = "";
+      if (parts.length >= 3) {
+        extraData = parts[2];
+      }
+      if ((parseFloat(sendToAmount) > 0 || extraData) && sendToAddress.length === 42) {
+        const scannerState = this.parseAndCleanPath(pathname);
+        this.setState({ scannerState }, () => {
+          this.changeView("send_to_address");
+        });
+      }
+    }
+  }
+  applyPathFromScan(scannedData) {
+    if (!scannedData) return;
+    let data = scannedData.trim();
+
+    if (data.indexOf("/pk") >= 0) {
+      let hash = "";
+      let pathname = data;
+      const hashIdx = data.indexOf("#");
+      if (hashIdx >= 0) {
+        hash = data.substring(hashIdx);
+        pathname = data.substring(0, hashIdx);
+      }
+      const pkIdx = pathname.indexOf("/pk");
+      if (pkIdx >= 0) {
+        pathname = pathname.substring(pkIdx);
+      }
+      this.applyPathFromUrl(pathname, hash);
+      return;
+    }
+
+    if (data.indexOf(":") >= 0 && data.indexOf("0x") < 0) {
+      const colonAt = data.lastIndexOf(":");
+      data = data.substring(colonAt + 1);
+    }
+    const slashAt = data.lastIndexOf("/");
+    if (slashAt >= 0) {
+      data = data.substring(slashAt);
+    }
+    if (!data) return;
+
+    let pathname = data;
+    let hash = "";
+    if (data.indexOf("#") >= 0) {
+      const hashParts = data.split("#");
+      pathname = hashParts[0];
+      hash = "#" + hashParts.slice(1).join("#");
+    }
+    if (pathname.indexOf("/") !== 0) {
+      pathname = "/" + pathname.replace(/^\/+/, "");
+    }
+    this.applyPathFromUrl(pathname, hash);
+  }
+  setupIncognitoProtection() {
+    detectIncognito().then((isIncognito) => {
+      if (isIncognito) {
+        this.setState({ isIncognito: true });
+      }
+    });
+    this.beforeUnloadHandler = (e) => {
+      if (this.state.isIncognito && this.state.metaAccount && this.state.metaAccount.privateKey) {
+        this.downloadPrivateKeyBackup();
+        e.returnValue = "Your funds may be lost if you close this private browsing tab.";
+      }
+    };
+    window.addEventListener("beforeunload", this.beforeUnloadHandler);
+  }
+  downloadPrivateKeyBackup() {
+    const pk = this.state.metaAccount.privateKey;
+    const blob = new Blob([pk], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "burner-wallet-private-key-backup.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+  componentWillUnmount() {
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener("beforeunload", this.beforeUnloadHandler);
+    }
+    clearInterval(interval);
+    clearInterval(intervalLong);
+    window.removeEventListener("resize", this.updateDimensions.bind(this));
+  }
   selectBadge(id){
     this.setState({selectedBadge:id},()=>{
       this.changeView('send_badge')
@@ -342,57 +488,9 @@ class App extends Component {
     document.body.style.backgroundColor = mainStyle.backgroundColor
     console.log("document.getElementsByClassName('className').style",document.getElementsByClassName('.btn').style)
     window.addEventListener("resize", this.updateDimensions.bind(this));
+    this.setupIncognitoProtection();
     if(window.location.pathname){
-      console.log("PATH",window.location.pathname,window.location.pathname.length,window.location.hash)
-      if(window.location.pathname.indexOf("/pk")>=0){
-        let tempweb3 = new Web3();
-        let base64encodedPK = window.location.hash.replace("#","")
-        let rawPK = tempweb3.utils.bytesToHex(base64url.toBuffer(base64encodedPK))
-        this.setState({possibleNewPrivateKey:rawPK})
-        window.history.pushState({},"", "/");
-      }else if(window.location.pathname.length==43){
-        this.changeView('send_to_address')
-        console.log("CHANGE VIEW")
-      }else if(window.location.pathname.length==134){
-        let parts = window.location.pathname.split(";")
-        let claimId = parts[0].replace("/","")
-        let claimKey = parts[1]
-        console.log("DO CLAIM",claimId,claimKey)
-        this.setState({claimId,claimKey})
-        window.history.pushState({},"", "/");
-      }else if(
-        (window.location.pathname.length>=65&&window.location.pathname.length<=67&&window.location.pathname.indexOf(";")<0) ||
-        (window.location.hash.length>=65 && window.location.hash.length <=67 && window.location.hash.indexOf(";")<0)
-      ){
-        console.log("incoming private key")
-        let privateKey = window.location.pathname.replace("/","")
-        if(window.location.hash){
-          privateKey = window.location.hash
-        }
-        privateKey = privateKey.replace("#","")
-        if(privateKey.indexOf("0x")!=0){
-          privateKey="0x"+privateKey
-        }
-        //console.log("!!! possibleNewPrivateKey",privateKey)
-        this.setState({possibleNewPrivateKey:privateKey})
-        window.history.pushState({},"", "/");
-      }else if(window.location.pathname.indexOf("/vendors;")==0){
-        this.changeView('vendors')
-      }else{
-        let parts = window.location.pathname.split(";")
-        console.log("PARTS",parts)
-        if(parts.length>=2){
-          let sendToAddress = parts[0].replace("/","")
-          let sendToAmount = parts[1]
-          let extraData = ""
-          if(parts.length>=3){
-            extraData = parts[2]
-          }
-          if((parseFloat(sendToAmount)>0 || extraData) && sendToAddress.length==42){
-            this.changeView('send_to_address')
-          }
-        }
-      }
+      this.applyPathFromUrl(window.location.pathname, window.location.hash);
     }
     setTimeout(this.poll.bind(this),150)
     setTimeout(this.poll.bind(this),650)
@@ -410,11 +508,6 @@ class App extends Component {
     }
     let xdaiweb3 = new Web3(new Web3.providers.HttpProvider(XDAI_PROVIDER))
     this.setState({mainnetweb3,ensContract,xdaiweb3,daiContract})
-  }
-  componentWillUnmount() {
-    clearInterval(interval)
-    clearInterval(intervalLong)
-    window.removeEventListener("resize", this.updateDimensions.bind(this));
   }
   async poll() {
 
@@ -1114,6 +1207,7 @@ render() {
 
             <div>
               {header}
+              {this.state.isIncognito && <IncognitoWarning />}
 
 
 
@@ -1415,6 +1509,7 @@ render() {
                   <SendByScan
                     parseAndCleanPath={this.parseAndCleanPath.bind(this)}
                     returnToState={this.returnToState.bind(this)}
+                    applyPathFromScan={this.applyPathFromScan.bind(this)}
                     returnState={this.state.returnState}
                     mainStyle={mainStyle}
                     goBack={this.goBack.bind(this)}
