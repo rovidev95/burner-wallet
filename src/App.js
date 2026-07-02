@@ -1666,8 +1666,9 @@ render() {
                           let randomHash = this.state.web3.utils.sha3(""+Math.random())
                           let randomWallet = this.state.web3.eth.accounts.create()
                           let sig = this.state.web3.eth.accounts.sign(randomHash, randomWallet.privateKey);
+                          const amountWei = this.state.web3.utils.toWei(String(amount), 'ether')
                           console.log("STATE",this.state,this.state.contracts)
-                          this.state.tx(this.state.contracts.Links.send(randomHash,sig.signature,0,amount*10**18,7),250000,false,amount*10**18,async (receipt)=>{
+                          this.state.tx(this.state.contracts.Links.send(randomHash,sig.signature,0,amountWei,7),250000,false,amountWei,async (receipt)=>{
                             this.setState({sendLink: randomHash,sendKey: randomWallet.privateKey},()=>{
                               console.log("STATE SAVED",this.state)
                             })
