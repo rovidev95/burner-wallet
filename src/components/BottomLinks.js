@@ -1,16 +1,20 @@
 import React from 'react';
 import { Scaler } from "dapparatus";
+import { Box, OutlineButton } from 'rimble-ui';
 import i18n from '../i18n';
-export default ({changeView}) => {
+
+export default ({ changeView }) => {
   return (
-    <div className="text-center bottom-text" style={{marginBottom:30}}>
-      <Scaler config={{startZoomAt:350,origin:"35% 50%",adjustedZoom:1}}>
-        <button className={"btn btn-large w-50"} style={{backgroundColor:"#666666",color:"#FFFFFF",padding:10,whiteSpace:"nowrap"}} onClick={()=>{changeView('advanced')}}>
-          <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-            <i className="fas fa-wrench"/> {i18n.t('advance')}
-          </Scaler>
-        </button>
+    <Box textAlign="center" className="bottom-text" mb={4}>
+      <Scaler config={{ startZoomAt: 350, origin: "35% 50%", adjustedZoom: 1 }}>
+        <OutlineButton
+          icon="Build"
+          width={0.5}
+          onClick={() => { changeView('advanced'); }}
+        >
+          {i18n.t('advance')}
+        </OutlineButton>
       </Scaler>
-    </div>
-  )
+    </Box>
+  );
 };
