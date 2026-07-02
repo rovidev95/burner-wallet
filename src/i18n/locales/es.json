@@ -102,6 +102,11 @@
       "disclaimer": "No lo hagas! Perderás todos tus fondos!",
       "cancel": "Cancelar",
       "burn": "Quemarla!"
+    },
+    "incognito": {
+      "title": "Navegación privada detectada — puedes perder tus fondos",
+      "body": "Burner Wallet guarda tu llave privada en el almacenamiento local del navegador. En modo incógnito/privado, esos datos se borran al cerrar esta pestaña. Abre esta página en una ventana normal o respalda tu llave privada antes de cerrar.",
+      "download_hint": "Si cierras esta pestaña, el navegador te ofrecerá descargar una copia de tu llave privada."
     }
   }
 }
