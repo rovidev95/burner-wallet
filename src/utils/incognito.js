@@ -1,17 +1,16 @@
 /**
  * Best-effort detection of private/incognito browsing mode.
- * Returns a Promise<boolean>.
+ * Returns a Promise<boolean>. Defaults to false when inconclusive (#244).
  */
 export function detectIncognito() {
-  if (navigator.storage && navigator.storage.estimate) {
-    return navigator.storage.estimate().then(({ quota }) => {
-      if (typeof quota === 'number' && quota < 120000000) {
+  return detectIncognitoLegacy()
+    .then((legacyPrivate) => {
+      if (legacyPrivate) {
         return true;
       }
-      return detectIncognitoLegacy();
-    }).catch(() => detectIncognitoLegacy());
-  }
-  return detectIncognitoLegacy();
+      return detectFirefoxPrivateMode();
+    })
+    .catch(() => false);
 }
 
 function detectIncognitoLegacy() {
@@ -22,5 +21,40 @@ function detectIncognitoLegacy() {
       return;
     }
     fs(window.TEMPORARY, 100, () => resolve(false), () => resolve(true));
+  });
+}
+
+function detectFirefoxPrivateMode() {
+  return new Promise((resolve) => {
+    if (!window.indexedDB || !/Firefox/i.test(navigator.userAgent)) {
+      resolve(false);
+      return;
+    }
+
+    let settled = false;
+    const finish = (isPrivate) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(isPrivate);
+    };
+
+    try {
+      const request = window.indexedDB.open('burner-wallet-incognito-probe');
+      request.onerror = () => finish(true);
+      request.onsuccess = () => {
+        request.result.close();
+        try {
+          window.indexedDB.deleteDatabase('burner-wallet-incognito-probe');
+        } catch (e) {
+          // ignore cleanup errors
+        }
+        finish(false);
+      };
+      window.setTimeout(() => finish(false), 500);
+    } catch (e) {
+      finish(true);
+    }
   });
 }
