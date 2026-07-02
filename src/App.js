@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import { ContractLoader, Dapparatus, Transactions, Gas, Address, Events } from "dapparatus";
 import Web3 from 'web3';
 import axios from 'axios';
-import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n';
 import gasless from 'tabookey-gasless';
 import './App.scss';
@@ -239,6 +239,13 @@ let dollarDisplay = (amount)=>{
 let interval
 let intervalLong
 
+const KNOWN_VIEWS = new Set([
+  'main', 'advanced', 'send_by_scan', 'withdraw_from_private', 'send_badge',
+  'send_to_address', 'receipt', 'receive', 'request_funds', 'share', 'share-link',
+  'send_with_link', 'burn-wallet', 'cash_out', 'exchange', 'vendors', 'loader',
+  'reader', 'claimer', 'history', 'admin', 'vendor',
+]);
+
 class App extends Component {
   constructor(props) {
 
@@ -275,6 +282,7 @@ class App extends Component {
     };
     this.alertTimeout = null;
     this.beforeUnloadHandler = null;
+    this.historyUnlisten = null;
 
     try{
       RNMessageChannel.on('json', update => {
@@ -447,6 +455,9 @@ class App extends Component {
     document.body.removeChild(a);
   }
   componentWillUnmount() {
+    if (this.historyUnlisten) {
+      this.historyUnlisten();
+    }
     if (this.beforeUnloadHandler) {
       window.removeEventListener("beforeunload", this.beforeUnloadHandler);
     }
@@ -454,13 +465,39 @@ class App extends Component {
     clearInterval(intervalLong);
     window.removeEventListener("resize", this.updateDimensions.bind(this));
   }
+  resolveViewFromPath(pathname) {
+    if (!pathname || pathname === '/') {
+      return null;
+    }
+    const segment = pathname.replace(/^\//, '').split('/')[0];
+    if (segment.startsWith('send_with_link')) {
+      return segment;
+    }
+    if (segment === 'account') {
+      const parts = pathname.split('/');
+      if (parts[2]) {
+        return 'account_' + parts[2];
+      }
+    }
+    if (KNOWN_VIEWS.has(segment)) {
+      return segment;
+    }
+    if (/^0x[a-fA-F0-9]{40}(;|$)/.test(segment)) {
+      return 'send_to_address';
+    }
+    if (segment === 'vendors' || pathname.indexOf('/vendors;') === 0) {
+      return 'vendors';
+    }
+    return null;
+  }
   selectBadge(id){
     this.setState({selectedBadge:id},()=>{
       this.changeView('send_badge')
     })
   }
   openScanner(returnState){
-    this.setState({returnState:returnState,view:"send_by_scan"})
+    this.setState({returnState:returnState});
+    this.changeView('send_by_scan');
   }
   returnToState(scannerState){
     let updateState = Object.assign({scannerState:scannerState}, this.state.returnState);
@@ -489,6 +526,22 @@ class App extends Component {
     console.log("document.getElementsByClassName('className').style",document.getElementsByClassName('.btn').style)
     window.addEventListener("resize", this.updateDimensions.bind(this));
     this.setupIncognitoProtection();
+    if (this.props.history) {
+      const initialPath = this.props.location.pathname;
+      if (initialPath === '/' || initialPath === '') {
+        let cachedView = localStorage.getItem("view");
+        let cachedViewSetAge = Date.now() - localStorage.getItem("viewSetTime");
+        if (cachedViewSetAge < 300000 && cachedView && cachedView !== '0') {
+          this.props.history.replace('/' + cachedView);
+        }
+      }
+      this.historyUnlisten = this.props.history.listen((location) => {
+        const routeView = this.resolveViewFromPath(location.pathname);
+        if (routeView && routeView !== this.state.view) {
+          this.setState({ view: routeView, scannerState: false });
+        }
+      });
+    }
     if(window.location.pathname){
       this.applyPathFromUrl(window.location.pathname, window.location.hash);
     }
@@ -844,23 +897,14 @@ class App extends Component {
       localStorage.setItem("view",view)//some pages should be sticky because of metamask reloads
       localStorage.setItem("viewSetTime",Date.now())
     }
-    /*if (view.startsWith('send_with_link')||view.startsWith('send_to_address')) {
-    console.log("This is a send...")
-    console.log("BALANCE",this.state.balance)
-    if (this.state.balance <= 0) {
-    console.log("no funds...")
-    this.changeAlert({
-    type: 'danger',
-    message: 'Insufficient funds',
-  });
-  return;
-}
-}
-*/
-this.changeAlert(null);
-console.log("Setting state",view)
-this.setState({ view, scannerState:false },cb);
-};
+    this.changeAlert(null);
+    console.log("Setting state",view)
+    const path = view.indexOf('/') === 0 ? view : '/' + view;
+    if (this.props.history) {
+      this.props.history.push(path);
+    }
+    this.setState({ view, scannerState:false },cb);
+  };
 changeAlert = (alert, hide=true) => {
   clearTimeout(this.alertTimeout);
   this.setState({ alert });
@@ -1093,8 +1137,9 @@ syncFullTransactions(){
 }
 render() {
   let {
-    web3, account, tx, gwei, block, avgBlockTime, etherscan, balance, metaAccount, burnMetaAccount, view, alert, send
+    web3, account, tx, gwei, block, avgBlockTime, etherscan, balance, metaAccount, burnMetaAccount, alert, send
   } = this.state;
+  let view = this.resolveViewFromPath(this.props.location.pathname) || this.state.view;
 
   let networkOverlay = ""
   if(web3 && !this.checkNetwork() && view!="exchange"){
@@ -1198,7 +1243,6 @@ render() {
 
   return (
     <ThemeProvider theme={theme}>
-      <I18nextProvider i18n={i18n}>
         <div style={mainStyle}>
           <div style={innerStyle}>
             {extraHead}
@@ -2055,7 +2099,6 @@ render() {
             {eventParser}
           </div>
         </div>
-      </I18nextProvider>
     </ThemeProvider>
   )
 }
@@ -2171,7 +2214,7 @@ let sortByBlockNumber = (a,b)=>{
   return 0
 }
 
-export default App;
+export default withRouter(App);
 
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
