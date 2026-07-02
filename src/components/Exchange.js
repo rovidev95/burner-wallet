@@ -1986,11 +1986,18 @@ export default class Exchange extends React.Component {
         }
         onClick={()=>{
           this.setState({ wyreWidgetOpen: true });
-          Wyre.displayWidget(
+          const opened = Wyre.displayWidget(
               this.props.address,
               this.state.wyreFundAmount,
               () => { this.setState({ wyreWidgetOpen: false }); }
           );
+          if (!opened) {
+            this.setState({ wyreWidgetOpen: false });
+            this.props.changeAlert({
+              type: 'warning',
+              message: 'Wyre payment widget failed to load. Please refresh and try again.'
+            });
+          }
         }}
       ><Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
         <div style={{flex: '0 0 30px', textAlign: 'center'}}>
