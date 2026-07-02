@@ -1,0 +1,26 @@
+name: Generate yarn.lock
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - package-lock.json
+      - package.json
+
+jobs:
+  yarn-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 14.x
+      - name: Generate yarn.lock from package-lock
+        run: |
+          git config --global url."https://github.com/".insteadOf git://github.com/
+          npx yarn@1.22.22 import || npx yarn@1.22.22 install --ignore-scripts
+      - name: Upload yarn.lock artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yarn-lock
+          path: yarn.lock
