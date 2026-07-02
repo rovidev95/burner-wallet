@@ -202,7 +202,7 @@ export default class History extends React.Component {
           txns.push(
             <div style={{paddingTop:10,paddingBottom:10}}>
               <Ruler />
-              <div className="content ops row" style={{position:"relative"}}>
+              <Box style={{ position: "relative" }}>
                 <div style={{position:'absolute',right:0,top:-13,opacity:0.5,fontSize:12}}>
                   {isEncrypted} {cleanTime((block-theseTransactionsByAddress[r].blockNumber)*5)} ago
                 </div>
@@ -217,14 +217,14 @@ export default class History extends React.Component {
                   </Linkify>
                 </div>
                 {messageValue}
-              </div>
+              </Box>
             </div>
           )
         }else{
           txns.push(
             <div key={"tx"+r} style={{paddingTop:3,paddingBottom:21}}>
               <Ruler />
-              <div className="content ops row" style={{position:"relative",paddingTop:3}}>
+              <Box style={{ position: "relative", paddingTop: 3 }}>
                 <div style={{position:'absolute',right:0,top:6,opacity:0.5,fontSize:12}}>
                   {cleanTime((block-theseTransactionsByAddress[r].blockNumber)*5)} ago
                 </div>
@@ -234,7 +234,7 @@ export default class History extends React.Component {
                 <div style={{position:'absolute',left:0}}>
                   <Blockies seed={theseTransactionsByAddress[r].from} scale={3}/>
                 </div>
-              </div>
+              </Box>
             </div>
           )
         }
@@ -251,7 +251,7 @@ export default class History extends React.Component {
           txns.push(
             <div key={"tx"+r} style={{paddingTop:10,paddingBottom:10}}>
               <Ruler />
-              <div className="content ops row" style={{position:"relative"}}>
+              <Box style={{ position: "relative" }}>
                 <div style={{position:'absolute',left:0,top:-13,opacity:0.5,fontSize:12}}>
                   {isEncrypted} {cleanTime((block-theseTransactionsByAddress[r].blockNumber)*5)} ago
                 </div>
@@ -266,14 +266,14 @@ export default class History extends React.Component {
                   </Linkify>
                 </div>
                 {messageValue}
-              </div>
+              </Box>
             </div>
           )
         }else{
           txns.push(
             <div key={"tx"+r} style={{paddingTop:3,paddingBottom:21}}>
               <Ruler />
-              <div className="content ops row" style={{position:"relative",paddingTop:3}}>
+              <Box style={{ position: "relative", paddingTop: 3 }}>
                 <div style={{position:'absolute',left:0,top:6,opacity:0.5,fontSize:12}}>
                   {cleanTime((block-theseTransactionsByAddress[r].blockNumber)*5)} ago
                 </div>
@@ -283,7 +283,7 @@ export default class History extends React.Component {
                 <div style={{position:'absolute',right:0}}>
                   <Blockies seed={theseTransactionsByAddress[r].from} scale={3}/>
                 </div>
-              </div>
+              </Box>
             </div>
           )
         }

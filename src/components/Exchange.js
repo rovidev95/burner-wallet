@@ -18,7 +18,8 @@ import {
   OutlineButton,
   Icon,
   Input,
-  Field
+  Field,
+  Card
 } from 'rimble-ui'
 
 import Wyre from '../services/wyre';
@@ -180,8 +181,7 @@ export default class Exchange extends React.Component {
       let extraGasUpDisplay = (
         <div style={{padding:10,width:"100%",textAlign:'center',backgroundColor:"#ffdddd"}}>
           <div style={{padding:10}}>You have DAI but no ETH for gas:</div>
-          <button style={this.props.buttonStyle.secondary}
-            className="btn btn-large"
+          <Button style={this.props.buttonStyle.secondary}
             onClick={()=>{
               if(this.state.gettingGas){
                 this.props.changeAlert({type: 'warning',message: "Already trying to fuel up via xDai->ETH"});
@@ -276,7 +276,7 @@ export default class Exchange extends React.Component {
             }}
           >
            {getGasText}
-          </button>
+          </Button>
         </div>
 
       )
@@ -827,15 +827,12 @@ export default class Exchange extends React.Component {
     if(this.props.ERC20TOKEN){
       if(xdaiToDendaiMode=="sending" || xdaiToDendaiMode=="withdrawing" || xdaiToDendaiMode=="depositing"){
         xdaiToDendaiDisplay = (
-          <div className="content ops row" style={{position:"relative"}}>
-            <button style={{width:Math.min(100,this.state.loaderBarPercent)+"%",backgroundColor:this.state.loaderBarColor,color:"#000000"}}
-              className="btn btn-large"
-            >
-            </button>
-            <div style={{position:'absolute',left:"50%",width:"100%",marginLeft:"-50%",fontSize:adjustedFontSize,top:adjustedTop,opacity:0.95,textAlign:"center"}}>
+          <Box position="relative" width={1}>
+            <Box width={Math.min(100, this.state.loaderBarPercent) + '%'} height="32px" bg={this.state.loaderBarColor} />
+            <Box position="absolute" left="50%" width="100%" style={{ marginLeft: '-50%', fontSize: adjustedFontSize, top: adjustedTop, opacity: 0.95, textAlign: 'center' }}>
               {this.state.loaderBarStatusText}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
 
       }else if(xdaiToDendaiMode=="deposit"){
@@ -843,40 +840,35 @@ export default class Exchange extends React.Component {
         //console.log("CHECKING META ACCOUNT ",this.state.xdaiMetaAccount,this.props.network)
         if(!this.state.xdaiMetaAccount && (this.props.network!="xDai"&&this.props.network!="Unknown")){
           xdaiToDendaiDisplay = (
-            <div className="content ops row" style={{textAlign:'center'}}>
-              <div className="col-12 p-1">
+            <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+              <Box width={1} px={1}>
                 Error: MetaMask network must be: <span style={{fontWeight:"bold",marginLeft:5}}>dai.poa.network</span>
                 <a href="#" onClick={()=>{this.setState({xdaiToDendaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                   <i className="fas fa-times"/> dismiss
                 </a>
-              </div>
-            </div>
+              </Box>
+            </Flex>
           )
         }else{
           xdaiToDendaiDisplay = (
-            <div className="content ops row">
+            <Flex alignItems="center" mx={-1}>
 
-              <div className="col-1 p-1"  style={colStyle}>
+              <Box width={1/12} px={1}  style={colStyle}>
                 <i className="fas fa-arrow-up"  />
-              </div>
-              <div className="col-5 p-1" style={colStyle}>
+              </Box>
+              <Box width={5/12} px={1} style={colStyle}>
                 <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <div className="input-group">
-                  <div className="input-group-prepend">
-                    <div className="input-group-text">$</div>
-                  </div>
-                  <input type="number" step="0.1" className="form-control" placeholder="0.00" value={this.state.amount}
-                         onChange={event => this.updateState('amount', event.target.value)} />
-                </div>
+                <Input type="number" step="0.1" placeholder="0.00" width={1} value={this.state.amount || ''}
+                       onChange={event => this.updateState('amount', event.target.value)} />
                 </Scaler>
-              </div>
-              <div className="col-3 p-1"  style={colStyle}>
+              </Box>
+              <Box width={3/12} px={1}  style={colStyle}>
                 <Scaler config={{startZoomAt:650,origin:"0% 85%"}}>
                 {xdaiCancelButton}
                 </Scaler>
-              </div>
-              <div className="col-3 p-1">
-                <button className="btn btn-large w-100"  disabled={buttonsDisabled} style={this.props.buttonStyle.primary} onClick={async ()=>{
+              </Box>
+              <Box width={3/12} px={1}>
+                <Button width={1} disabled={buttonsDisabled} onClick={async ()=>{
 
                   let amountOfxDaiToDeposit = this.state.xdaiweb3.utils.toWei(""+this.state.amount,'ether')
                   console.log("Using DenDai contract to deposit "+amountOfxDaiToDeposit+" xDai")
@@ -942,24 +934,24 @@ export default class Exchange extends React.Component {
                   <Scaler config={{startZoomAt:600,origin:"10% 50%"}}>
                     <i className="fas fa-arrow-up" /> Send
                   </Scaler>
-                </button>
+                </Button>
 
-              </div>
-            </div>
+              </Box>
+            </Flex>
           )
         }
       }else if(xdaiToDendaiMode=="withdraw"){
         console.log("CHECKING META ACCOUNT ",this.state.xdaiMetaAccount,this.props.network)
         if(!this.state.xdaiMetaAccount && (this.props.network!="xDai"&&this.props.network!="Unknown")){
           xdaiToDendaiDisplay = (
-            <div className="content ops row" style={{textAlign:'center'}}>
-              <div className="col-12 p-1">
+            <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+              <Box width={1} px={1}>
                 Error: MetaMask network must be: <span style={{fontWeight:"bold",marginLeft:5}}>dai.poa.network</span>
                 <a href="#" onClick={()=>{this.setState({xdaiToDendaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                   <i className="fas fa-times"/> dismiss
                 </a>
-              </div>
-            </div>
+              </Box>
+            </Flex>
           )
         }else{
 
@@ -967,43 +959,38 @@ export default class Exchange extends React.Component {
 
           if(!this.props.isAdmin && (!this.props.isVendor || !this.props.isVendor.isAllowed)){
             extraWithdrawInfo = (
-              <div className="content ops row" style={{paddingTop:10}}>
-                <div style={{width:"100%",textAlign:'center'}}>
+              <Box pt={3} width={1}>
+                <Box width="100%" textAlign="center">
                   Maximum withdrawal amount: {this.props.dollarDisplay(this.state.maxWithdrawlAmount)}
-                </div>
-                <div style={{width:"100%",textAlign:'center',opacity:0.5}}>
+                </Box>
+                <Box width="100%" textAlign="center" style={{ opacity: 0.5 }}>
                   ({this.state.withdrawalExplanation})
-                </div>
-              </div>
+                </Box>
+              </Box>
             )
           }
 
 
           xdaiToDendaiDisplay = (
-            <div>
-              <div className="content ops row">
+            <Box>
+              <Flex alignItems="center" mx={-1}>
 
-                <div className="col-1 p-1"  style={colStyle}>
+                <Box width={1/12} px={1}  style={colStyle}>
                   <i className="fas fa-arrow-down"  />
-                </div>
-                <div className="col-5 p-1" style={colStyle}>
+                </Box>
+                <Box width={5/12} px={1} style={colStyle}>
                   <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                  <div className="input-group">
-                    <div className="input-group-prepend">
-                      <div className="input-group-text">$</div>
-                    </div>
-                    <input type="number" step="0.1" className="form-control" placeholder="0.00" value={this.state.amount}
-                           onChange={event => this.updateState('amount', event.target.value)} />
-                  </div>
+                  <Input type="number" step="0.1" placeholder="0.00" width={1} value={this.state.amount || ''}
+                         onChange={event => this.updateState('amount', event.target.value)} />
                   </Scaler>
-                </div>
-                <div className="col-3 p-1"  style={colStyle}>
+                </Box>
+                <Box width={3/12} px={1}  style={colStyle}>
                   <Scaler config={{startZoomAt:650,origin:"0% 85%"}}>
                   {xdaiCancelButton}
                   </Scaler>
-                </div>
-                <div className="col-3 p-1">
-                  <button className="btn btn-large w-100"  disabled={buttonsDisabled} style={this.props.buttonStyle.primary} onClick={async ()=>{
+                </Box>
+                <Box width={3/12} px={1}>
+                  <Button width={1} disabled={buttonsDisabled} onClick={async ()=>{
 
                     let amountOfxDaiToWithdraw = this.state.xdaiweb3.utils.toWei(""+this.state.amount,'ether')
                     console.log("Using "+this.props.ERC20NAME+" contract to withdraw "+amountOfxDaiToWithdraw+" xDai")
@@ -1069,12 +1056,12 @@ export default class Exchange extends React.Component {
                     <Scaler config={{startZoomAt:600,origin:"10% 50%"}}>
                       <i className="fas fa-arrow-down" /> Send
                     </Scaler>
-                  </button>
+                  </Button>
 
-                </div>
-              </div>
+                </Box>
+              </Flex>
               {extraWithdrawInfo}
-            </div>
+            </Box>
           )
         }
       }else{
@@ -1083,28 +1070,28 @@ export default class Exchange extends React.Component {
 
 
         xdaiToDendaiDisplay = (
-           <div className="content ops row">
+           <Flex alignItems="center" mx={-1}>
 
-             <div className="col-6 p-1">
-               <button className="btn btn-large w-100"  style={this.props.buttonStyle.primary} disabled={buttonsDisabled}  onClick={()=>{
+             <Box width={6/12} px={1}>
+               <Button width={1} disabled={buttonsDisabled} onClick={()=>{
                  this.setState({xdaiToDendaiMode:"deposit"})
                }}>
                   <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                     <i className="fas fa-arrow-up"  /> xDai to {this.props.ERC20NAME}
                   </Scaler>
-               </button>
-             </div>
+               </Button>
+             </Box>
 
-             <div className="col-6 p-1">
-               <button className="btn btn-large w-100"  style={this.props.buttonStyle.primary} disabled={buttonsDisabled}  onClick={()=>{
+             <Box width={6/12} px={1}>
+               <Button width={1} disabled={buttonsDisabled} onClick={()=>{
                  this.setState({xdaiToDendaiMode:"withdraw"})
                }}>
                  <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                   <i className="fas fa-arrow-down" /> {this.props.ERC20NAME} to xDai
                  </Scaler>
-               </button>
-             </div>
-           </div>
+               </Button>
+             </Box>
+           </Flex>
         )
       }
 
@@ -1115,33 +1102,33 @@ export default class Exchange extends React.Component {
 
       tokenDisplay = (
         <div>
-          <div className="content ops row" style={{paddingBottom:20}}>
-            <div className="col-2 p-1">
+          <Flex alignItems="center" mx={-1} style={{paddingBottom:20}}>
+            <Box width={2/12} px={1}>
               <a href={link} target="_blank">
                 <img style={logoStyle} src={this.props.ERC20IMAGE} />
               </a>
-            </div>
-            <div className="col-3 p-1" style={{marginTop:8}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:8}}>
               {this.props.ERC20NAME}
-            </div>
-            <div className="col-5 p-1" style={{marginTop:8,whiteSpace:"nowrap"}}>
+            </Box>
+            <Box width={5/12} px={1} style={{marginTop:8,whiteSpace:"nowrap"}}>
                 <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                   {this.props.dollarDisplay(this.state.denDaiBalance)}
                 </Scaler>
-            </div>
-            <div className="col-2 p-1" style={{marginTop:8}}>
-              <button className="btn btn-large w-100" disabled={buttonsDisabled} style={this.props.buttonStyle.secondary} onClick={this.props.goBack}>
+            </Box>
+            <Box width={2/12} px={1} style={{marginTop:8}}>
+              <Button width={1} disabled={buttonsDisabled} onClick={this.props.goBack}>
                 <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                   <i className="fas fa-arrow-right"></i>
                 </Scaler>
-              </button>
-            </div>
+              </Button>
+            </Box>
 
-          </div>
+          </Flex>
 
-          <div className="main-card card w-100">
+          <Card width={1}>
             {xdaiToDendaiDisplay}
-          </div>
+          </Card>
         </div>
       )
     }
@@ -1150,65 +1137,60 @@ export default class Exchange extends React.Component {
     //console.log("daiToXdaiMode",daiToXdaiMode)
     if(daiToXdaiMode=="sending" || daiToXdaiMode=="withdrawing" || daiToXdaiMode=="depositing"){
       daiToXdaiDisplay = (
-        <div className="content ops row" style={{position:"relative"}}>
-          <button style={{width:Math.min(100,this.state.loaderBarPercent)+"%",backgroundColor:this.state.loaderBarColor,color:"#000000"}}
-            className="btn btn-large"
-          >
-          </button>
-          <div style={{position:'absolute',left:"50%",width:"100%",marginLeft:"-50%",fontSize:adjustedFontSize,top:adjustedTop,opacity:0.95,textAlign:"center"}}>
+        <Box position="relative" width={1}>
+          <Box width={Math.min(100, this.state.loaderBarPercent) + '%'} height="32px" bg={this.state.loaderBarColor} />
+          <Box position="absolute" left="50%" width="100%" style={{ marginLeft: '-50%', fontSize: adjustedFontSize, top: adjustedTop, opacity: 0.95, textAlign: 'center' }}>
             {this.state.loaderBarStatusText}
-          </div>
-        </div>
+          </Box>
+        </Box>
       )
 
     }else if(daiToXdaiMode=="deposit"){
       if(!this.state.mainnetMetaAccount && this.props.network!="Mainnet"){
         daiToXdaiDisplay = (
-          <div className="content ops row" style={{textAlign:'center'}}>
-            <div className="col-12 p-1">
+          <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+            <Box width={1} px={1}>
               Error: MetaMask network must be: <span style={{fontWeight:"bold",marginLeft:5}}>Mainnet</span>
               <a href="#" onClick={()=>{this.setState({daiToXdaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                 <i className="fas fa-times"/> dismiss
               </a>
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
       }else if(this.props.ethBalance<=0){
         daiToXdaiDisplay = (
-          <div className="content ops row" style={{textAlign:'center'}}>
-            <div className="col-12 p-1">
+          <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+            <Box width={1} px={1}>
               Error: You must have ETH to send DAI.
               <a href="#" onClick={()=>{this.setState({daiToXdaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                 <i className="fas fa-times"/> dismiss
               </a>
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
       }else{
         daiToXdaiDisplay = (
-          <div className="content ops row">
-            <div className="col-1 p-1"  style={colStyle}>
+          <Flex alignItems="center" mx={-1}>
+            <Box width={1/12} px={1}  style={colStyle}>
               <i className="fas fa-arrow-up"  />
-            </div>
-            <div className="col-6 p-1" style={colStyle}>
+            </Box>
+            <Box width={6/12} px={1} style={colStyle}>
               <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-              <div className="input-group">
-                <Input
+              <Input
                   width={1}
                   type="number"
                   step="0.1"
                   placeholder="$0.00"
                   value={this.state.amount}
                   onChange={event => this.updateState('amount', event.target.value)} />
-              </div>
               </Scaler>
-            </div>
-            <div className="col-2 p-1"  style={colStyle}>
+            </Box>
+            <Box width={2/12} px={1}  style={colStyle}>
               <Scaler config={{startZoomAt:650,origin:"0% 85%"}}>
               {daiCancelButton}
               </Scaler>
-            </div>
-            <div className="col-3 p-1">
+            </Box>
+            <Box width={3/12} px={1}>
 
               <Button
                 disabled={buttonsDisabled}
@@ -1244,49 +1226,47 @@ export default class Exchange extends React.Component {
                 </Scaler>
               </Button>
 
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
       }
     } else if(daiToXdaiMode=="withdraw"){
       console.log("CHECKING META ACCOUNT ",this.state.xdaiMetaAccount,this.props.network)
       if(!this.state.xdaiMetaAccount && this.props.network!="xDai"){
         daiToXdaiDisplay = (
-          <div className="content ops row" style={{textAlign:'center'}}>
-            <div className="col-12 p-1">
+          <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+            <Box width={1} px={1}>
               Error: MetaMask network must be: <span style={{fontWeight:"bold",marginLeft:5}}>dai.poa.network</span>
               <a href="#" onClick={()=>{this.setState({daiToXdaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                 <i className="fas fa-times"/> dismiss
               </a>
-            </div>
-          </div>
+            </Box>
+          </Flex>
         )
       }else{
         daiToXdaiDisplay = (
-          <div className="content ops row">
+          <Flex alignItems="center" mx={-1}>
 
-            <div className="col-1 p-1"  style={colStyle}>
+            <Box width={1/12} px={1}  style={colStyle}>
               <i className="fas fa-arrow-down"  />
-            </div>
-            <div className="col-6 p-1" style={colStyle}>
+            </Box>
+            <Box width={6/12} px={1} style={colStyle}>
               <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-              <div className="input-group">
-                <Input
+              <Input
                   width={1}
                   type="number"
                   step="0.1"
                   placeholder="$0.00"
                   value={this.state.amount}
                   onChange={event => this.updateState('amount', event.target.value)} />
-              </div>
               </Scaler>
-            </div>
-            <div className="col-2 p-1"  style={colStyle}>
+            </Box>
+            <Box width={2/12} px={1}  style={colStyle}>
               <Scaler config={{startZoomAt:650,origin:"0% 85%"}}>
               {daiCancelButton}
               </Scaler>
-            </div>
-            <div className="col-3 p-1">
+            </Box>
+            <Box width={3/12} px={1}>
               <Button disabled={buttonsDisabled} onClick={async ()=>{
                 console.log("AMOUNT:",this.state.amount,"DAI BALANCE:",this.props.daiBalance)
                 this.setState({
@@ -1384,8 +1364,8 @@ export default class Exchange extends React.Component {
                 </Scaler>
               </Button>
 
-            </div>
-          </div>
+            </Box>
+          </Flex>
         )
       }
     } else {
@@ -1414,55 +1394,50 @@ export default class Exchange extends React.Component {
 
     if(ethToDaiMode=="sending" || ethToDaiMode=="depositing" || ethToDaiMode=="withdrawing"){
       ethToDaiDisplay = (
-        <div className="content ops row" style={{position:"relative"}}>
-          <button style={{width:Math.min(100,this.state.loaderBarPercent)+"%",backgroundColor:this.state.loaderBarColor,color:"#000000"}}
-            className="btn btn-large"
-          >
-          </button>
-          <div style={{position:'absolute',left:"50%",width:"100%",marginLeft:"-50%",fontSize:adjustedFontSize,top:adjustedTop,opacity:0.95,textAlign:"center"}}>
+        <Box position="relative" width={1}>
+          <Box width={Math.min(100, this.state.loaderBarPercent) + '%'} height="32px" bg={this.state.loaderBarColor} />
+          <Box position="absolute" left="50%" width="100%" style={{ marginLeft: '-50%', fontSize: adjustedFontSize, top: adjustedTop, opacity: 0.95, textAlign: 'center' }}>
             {this.state.loaderBarStatusText}
-          </div>
-        </div>
+          </Box>
+        </Box>
       )
 
     }else if(ethToDaiMode=="deposit"){
       if(!this.state.mainnetMetaAccount && this.props.network!="Mainnet"){
         ethToDaiDisplay = (
-          <div className="content ops row" style={{textAlign:'center'}}>
-            <div className="col-12 p-1">
+          <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+            <Box width={1} px={1}>
               Error: MetaMask network must be: <span style={{fontWeight:"bold",marginLeft:5}}>Mainnet</span>
               <a href="#" onClick={()=>{this.setState({ethToDaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                 <i className="fas fa-times"/> dismiss
               </a>
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
       }else{
         ethToDaiDisplay = (
-          <div className="content ops row">
+          <Flex alignItems="center" mx={-1}>
 
-            <div className="col-1 p-1"  style={colStyle}>
+            <Box width={1/12} px={1}  style={colStyle}>
               <i className="fas fa-arrow-up"  />
-            </div>
-            <div className="col-6 p-1" style={colStyle}>
+            </Box>
+            <Box width={6/12} px={1} style={colStyle}>
               <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-              <div className="input-group">
-                <Input
+              <Input
                   width={1}
                   type="number"
                   step="0.1"
                   placeholder="$0.00"
                   value={this.state.amount}
                   onChange={event => this.updateState('amount', event.target.value)} />
-              </div>
               </Scaler>
-            </div>
-            <div className="col-2 p-1"  style={colStyle}>
+            </Box>
+            <Box width={2/12} px={1}  style={colStyle}>
               <Scaler config={{startZoomAt:650,origin:"0% 85%"}}>
               {ethCancelButton}
               </Scaler>
-            </div>
-            <div className="col-3 p-1">
+            </Box>
+            <Box width={3/12} px={1}>
               <Button disabled={buttonsDisabled} onClick={async ()=>{
 
                 console.log("Using uniswap exchange to move ETH to DAI")
@@ -1541,60 +1516,58 @@ export default class Exchange extends React.Component {
                 </Scaler>
               </Button>
 
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
       }
 
     }else if(ethToDaiMode=="withdraw"){
       if(!this.state.mainnetMetaAccount && this.props.network!="Mainnet"){
         ethToDaiDisplay = (
-          <div className="content ops row" style={{textAlign:'center'}}>
-            <div className="col-12 p-1">
+          <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+            <Box width={1} px={1}>
               Error: MetaMask network must be: <span style={{fontWeight:"bold",marginLeft:5}}>Mainnet</span>
               <a href="#" onClick={()=>{this.setState({ethToDaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                 <i className="fas fa-times"/> dismiss
               </a>
-            </div>
-          </div>
+            </Box>
+          </Box>
         )
       }else if(this.props.ethBalance<=0){
         ethToDaiDisplay = (
-          <div className="content ops row" style={{textAlign:'center'}}>
-            <div className="col-12 p-1">
+          <Flex alignItems="center" mx={-1} style={{textAlign:'center'}}>
+            <Box width={1} px={1}>
               Error: You must have ETH to send DAI.
               <a href="#" onClick={()=>{this.setState({ethToDaiMode:false})}} style={{marginLeft:40,color:"#666666"}}>
                 <i className="fas fa-times"/> dismiss
               </a>
-            </div>
-          </div>
+            </Box>
+          </Flex>
         )
       }else{
         ethToDaiDisplay = (
-          <div className="content ops row">
+          <Flex alignItems="center" mx={-1}>
 
-            <div className="col-1 p-1"  style={colStyle}>
+            <Box width={1/12} px={1}  style={colStyle}>
               <i className="fas fa-arrow-down"  />
-            </div>
-            <div className="col-6 p-1" style={colStyle}>
+            </Box>
+            <Box width={6/12} px={1} style={colStyle}>
               <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-              <div className="input-group">
-                <Input
+              <Input
                   width={1}
                   type="number"
                   step="0.1"
                   placeholder="$0.00"
                   value={this.state.amount}
                   onChange={event => this.updateState('amount', event.target.value)} />
-              </div>
               </Scaler>
-            </div>
-            <div className="col-2 p-1"  style={colStyle}>
+            </Box>
+            <Box width={2/12} px={1}  style={colStyle}>
               <Scaler config={{startZoomAt:650,origin:"0% 85%"}}>
               {ethCancelButton}
               </Scaler>
-            </div>
-            <div className="col-3 p-1">
+            </Box>
+            <Box width={3/12} px={1}>
               <Button disabled={buttonsDisabled} onClick={async ()=>{
 
                 console.log("Using uniswap exchange to move DAI to ETH")
@@ -1873,8 +1846,8 @@ export default class Exchange extends React.Component {
                   <i className="fas fa-arrow-down" /> Send
                 </Scaler>
               </Button>
-            </div>
-          </div>
+            </Box>
+          </Flex>
         )
       }
 
@@ -1936,7 +1909,7 @@ export default class Exchange extends React.Component {
           </Field>
           <div>
             { this.state.daiSendToAddress && this.state.daiSendToAddress.length==42 && <Blockies seed={this.state.daiSendToAddress.toLowerCase()} scale={10} /> }
-          </div>
+          </Box>
           <Field label={'Send Amount'} mb={3}>
             <Flex>
               <Input
@@ -1972,13 +1945,13 @@ export default class Exchange extends React.Component {
         </Box>
       )
       sendDaiButton = (
-        <button className="btn btn-large w-100" style={{backgroundColor:"#888888",whiteSpace:"nowrap"}} onClick={()=>{
+        <Button width={1} style={{backgroundColor:"#888888",whiteSpace:"nowrap"}} onClick={()=>{
           this.setState({sendDai:false})
         }}>
           <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
             <i className="fas fa-times"></i>
           </Scaler>
-        </button>
+        </Button>
       )
     }
 
@@ -1997,8 +1970,9 @@ export default class Exchange extends React.Component {
     )
 
     let fundByWyreButton = (
-      <button
-        className="btn btn-large w-100 wyre-button--font-size"
+      <Button
+        width={1}
+        className="wyre-button--font-size"
         disabled={buttonsDisabled}
         style={
             Object.assign({}, this.props.buttonStyle.secondary, {
@@ -2027,9 +2001,9 @@ export default class Exchange extends React.Component {
                     </span>
                     <span>Loading...</span>
                 </>) : `Buy $${this.state.wyreFundAmount}`}
-        </div>
+        </Flex>
         </Scaler>
-      </button>
+      </Button>
     )
 
 
@@ -2054,7 +2028,7 @@ export default class Exchange extends React.Component {
           </Field>
           <div>
             { this.state.ethSendToAddress && this.state.ethSendToAddress.length==42 && <Blockies seed={this.state.ethSendToAddress.toLowerCase()} scale={10} /> }
-          </div>
+          </Box>
           <Field label={'Send Amount'} mb={3}>
             <Flex>
               <Input
@@ -2108,13 +2082,13 @@ export default class Exchange extends React.Component {
         </Box>
       )
       sendEthButton = (
-        <button className="btn btn-large w-100" style={{backgroundColor:"#888888",whiteSpace:"nowrap"}} onClick={()=>{
+        <Button width={1} style={{backgroundColor:"#888888",whiteSpace:"nowrap"}} onClick={()=>{
           this.setState({sendEth:false})
         }}>
           <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
             <i className="fas fa-times"></i>
           </Scaler>
-        </button>
+        </Button>
       )
     }
 
@@ -2155,7 +2129,7 @@ export default class Exchange extends React.Component {
           <Field label={'To Address'} mb={3}>
             <Input
               type="text"
-              className="form-control"
+             
               placeholder="0x..."
               value={this.state.xdaiSendToAddress}
               onChange={event => this.updateState('xdaiSendToAddress', event.target.value)}
@@ -2163,13 +2137,13 @@ export default class Exchange extends React.Component {
           </Field>
           <div>
             { this.state.xdaiSendToAddress && this.state.xdaiSendToAddress.length==42 && <Blockies seed={this.state.xdaiSendToAddress.toLowerCase()} scale={10} /> }
-          </div>
+          </Box>
           <Field label={'Send Amount'} mb={3}>
             <Flex>
               <Input
                 type="number"
                 step="0.1"
-                className="form-control"
+               
                 placeholder="$0.00"
                 value={this.state.xdaiSendAmount}
                 onChange={event => this.updateState('xdaiSendAmount', event.target.value)}
@@ -2193,13 +2167,13 @@ export default class Exchange extends React.Component {
         </Box>
       )
       sendXdaiButton = (
-        <button className="btn btn-large w-100" style={{backgroundColor:"#888888",whiteSpace:"nowrap"}} onClick={()=>{
+        <Button width={1} style={{backgroundColor:"#888888",whiteSpace:"nowrap"}} onClick={()=>{
           this.setState({sendXdai:false})
         }}>
           <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
             <i className="fas fa-times"></i>
           </Scaler>
-        </button>
+        </Button>
       )
     }
 
@@ -2210,99 +2184,84 @@ export default class Exchange extends React.Component {
         {tokenDisplay}
 
 
-          <div className="content ops row" style={{paddingBottom:20}}>
-            <div className="col-2 p-1">
+          <Flex alignItems="center" mx={-1} style={{paddingBottom:20}}>
+            <Box width={2/12} px={1}>
               <img style={logoStyle} src={this.props.xdai} />
-            </div>
-            <div className="col-3 p-1" style={{marginTop:8}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:8}}>
               xDai
-            </div>
-            <div className="col-4 p-1" style={{marginTop:8,whiteSpace:"nowrap"}}>
+            </Box>
+            <Box width={4/12} px={1} style={{marginTop:8,whiteSpace:"nowrap"}}>
                 <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                   {this.props.dollarDisplay(this.props.xdaiBalance)}
                 </Scaler>
-            </div>
-            <div className="col-3 p-1" style={{marginTop:8}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:8}}>
               {sendXdaiButton}
-            </div>
+            </Box>
 
-          </div>
+          </Box>
           {sendXdaiRow}
 
-        <div className="main-card card w-100">
+        <Card width={1}>
           {daiToXdaiDisplay}
-        </div>
+        </Flex>
 
 
 
-          <div className="content ops row" style={{paddingBottom:20}}>
-            <div className="col-2 p-1">
+          <Flex alignItems="center" mx={-1} style={{paddingBottom:20}}>
+            <Box width={2/12} px={1}>
               <img style={logoStyle} src={this.props.dai} />
-            </div>
-            <div className="col-3 p-1" style={{marginTop:9}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:9}}>
               DAI
-            </div>
-            <div className="col-4 p-1" style={{marginTop:9,whiteSpace:"nowrap"}}>
+            </Box>
+            <Box width={4/12} px={1} style={{marginTop:9,whiteSpace:"nowrap"}}>
               <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                 {this.props.dollarDisplay(this.props.daiBalance)}
               </Scaler>
-            </div>
-            <div className="col-3 p-1" style={{marginTop:8}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:8}}>
               {sendDaiButton}
-            </div>
-          </div>
+            </Box>
+          </Flex>
           {sendDaiRow}
 
 
-        <div className="main-card card w-100">
+        <Card width={1}>
           {ethToDaiDisplay}
-        </div>
+        </Flex>
 
 
-          <div className="content ops row" style={{paddingBottom:20}}>
-            <div className="col-2 p-1">
+          <Flex alignItems="center" mx={-1} style={{paddingBottom:20}}>
+            <Box width={2/12} px={1}>
               <img style={logoStyle} src={this.props.eth} />
-            </div>
-            <div className="col-3 p-1" style={{marginTop:10}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:10}}>
               ETH
-            </div>
-            <div className="col-4 p-1" style={{marginTop:10,whiteSpace:"nowrap"}}>
+            </Box>
+            <Box width={4/12} px={1} style={{marginTop:10,whiteSpace:"nowrap"}}>
               <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                 {this.props.dollarDisplay(this.props.ethBalance*this.props.ethprice)}
               </Scaler>
-            </div>
-            <div className="col-3 p-1" style={{marginTop:8}}>
+            </Box>
+            <Box width={3/12} px={1} style={{marginTop:8}}>
               {sendEthButton}
-            </div>
-          </div>
+            </Box>
+          </Flex>
 
 
           { (window.location.hostname.indexOf("localhost") >= 0 || window.location.hostname.indexOf("wyre.xdai.io") >= 0 || window.location.hostname.indexOf("s.xdai.io") >= 0) && (
-            <div className="send-to-address card w-100" style={{marginTop:20,borderBottom:0,paddingTop:50}}>
-              <div className="content ops row">
-                <div className="col-2 p-1">
+            <Card width={1} style={{marginTop:20,borderBottom:0,paddingTop:50}}>
+              <Flex alignItems="center" mx={-1}>
+                <Box width={2/12} px={1}>
                   <img style={logoStyle} src={wyrelogo} />
-                </div>
-                <div className="col-2 p-1" style={{marginTop:10}}>
+                </Box>
+                <Box width={2/12} px={1} style={{marginTop:10}}>
                   Wyre
-                </div>
-                <div className="col-5 p-1" style={{whiteSpace:"nowrap"}}>
-                    {/*<div className="input-group">
-                        <div className="input-group-prepend">
-                            <div className="input-group-text">$</div>
-                        </div>
-                        <input
-                            type="number"
-                            step="0.1"
-                            className="form-control"
-                            placeholder="0.00"
-                            value={this.state.wyreFundAmount}
-                            onChange={event =>
-                                this.updateState('wyreFundAmount', event.target.value)
-                            }
-                        />
-                    </div>*/}
-                    <div className="wyre-slider" style={{padding: '0 20px', display: 'flex', alignItems: 'center', paddingTop: '15px',}}>
+                </Box>
+                <Box width={5/12} px={1} style={{whiteSpace:"nowrap"}}>
+                    <div className="wyre-slider" style={{padding: '0 20px', display: 'flex', alignItems: 'center', paddingTop: '15px'}}>
                     <InputRange
                         maxValue={25}
                         minValue={5}
@@ -2314,12 +2273,12 @@ export default class Exchange extends React.Component {
                         }
                     />
                     </div>
-                </div>
-                <div className="col-3 p-1" style={{marginTop:8}}>
+                </Box>
+                <Box width={3/12} px={1} style={{marginTop:8}}>
                   {fundByWyreButton}
-                </div>
-              </div>
-            </div>
+                </Box>
+              </Flex>
+            </Card>
           )}
 
 
