@@ -1,39 +1,44 @@
 import React from 'react';
 import Ruler from "./Ruler";
-import Balance from "./Balance";
 import i18n from '../i18n';
+import {
+  Box,
+  Button,
+  Flex,
+  Text
+} from 'rimble-ui';
 
-
-
-export default ({mainStyle, address, balance, burnWallet, goBack, dollarDisplay}) => {
-
+export default ({ mainStyle, goBack, burnWallet }) => {
   return (
-
-    <div>
-      <div style={{textAlign:"center",width:"100%",fontWeight:'bold',fontSize:30}}>
+    <Box>
+      <Text textAlign="center" width={1} fontWeight="bold" fontSize={6}>
         {i18n.t('burn_wallet.burn_private_key_question')}
-      </div>
-      <div style={{textAlign:"center",marginTop:20,width:"100%",fontWeight:'bold',fontSize:20}}>
+      </Text>
+      <Text textAlign="center" mt={4} width={1} fontWeight="bold" fontSize={4}>
         {i18n.t('burn_wallet.disclaimer')}
-      </div>
-      <div>
-        <Ruler/>
-        <div className="content ops row">
-
-            <div className="col-6 p-1">
-              <button className="btn btn-large w-100" style={{backgroundColor:mainStyle.mainColor}} onClick={goBack} >
-                  <i className="fas fa-arrow-left"  /> {i18n.t('burn_wallet.cancel')}
-              </button>
-            </div>
-
-          <div className="col-6 p-1">
-            <button className="btn btn-large w-100" style={{backgroundColor:"#c53838"}} onClick={burnWallet}>
-                <i className="fas fa-fire"/> {i18n.t('burn_wallet.burn')}
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  )
-}
+      </Text>
+      <Ruler />
+      <Flex mx={-2}>
+        <Box width={1 / 2} px={2}>
+          <Button
+            icon="ArrowBack"
+            width={1}
+            onClick={goBack}
+          >
+            {i18n.t('burn_wallet.cancel')}
+          </Button>
+        </Box>
+        <Box width={1 / 2} px={2}>
+          <Button
+            icon="Whatshot"
+            width={1}
+            bg="#c53838"
+            onClick={burnWallet}
+          >
+            {i18n.t('burn_wallet.burn')}
+          </Button>
+        </Box>
+      </Flex>
+    </Box>
+  );
+};

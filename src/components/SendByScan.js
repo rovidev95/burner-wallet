@@ -5,6 +5,7 @@ import QrCode from 'qrcode-reader';
 import qrimage from '../qrcode.png';
 import RNMessageChannel from 'react-native-webview-messaging';
 import i18n from "../i18n";
+import { Button, Box } from 'rimble-ui';
 var Jimp = require("jimp");
 let interval
 class SendByScan extends Component {
@@ -230,16 +231,13 @@ class SendByScan extends Component {
             <div style={{marginBottom:20}}><i className="fas fa-camera"></i></div>
             <img src={qrimage} style={{position:"absolute",left:"36%",top:"25%",padding:4,border:"1px solid #888888",opacity:0.25,maxWidth:"30%",maxHight:"30%"}} />
           </div>
-          <div style={{textAlign:"center",paddingTop:"35%"}}>
-
-            <div>{i18n.t('send_by_scan.capture')}</div>
-              <div className="main-card card w-100" style={{backgroundColor:"#000000"}}>
-                <div className="content ops row" style={{paddingLeft:"12%",paddingRight:"12%",paddingTop:10}}>
-                    <button className="btn btn-large w-100" style={{backgroundColor:this.props.mainStyle.mainColor}}>
-                        <i className="fas fa-camera"  /> {i18n.t('send_by_scan.take_photo')}
-                    </button>
-                </div>
-              </div>
+            <div style={{textAlign:"center",paddingTop:"35%"}}>
+              <div>{i18n.t('send_by_scan.capture')}</div>
+              <Box px="12%" pt={3}>
+                <Button icon="Camera" width={1}>
+                  {i18n.t('send_by_scan.take_photo')}
+                </Button>
+              </Box>
             </div>
             <div style={{textAlign:"center",paddingTop:"5%"}}>
               Lay QR flat and take a picture of it from a distance.
