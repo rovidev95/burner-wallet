@@ -7,6 +7,9 @@ import Blockies from 'react-blockies';
 import i18n from '../i18n';
 import {
   Button,
+  Box,
+  Field,
+  Flex,
   Input
 } from 'rimble-ui'
 
@@ -128,94 +131,80 @@ export default class SendToAddress extends React.Component {
         if(prod.isAvailable){
           let costInDollars = this.props.web3.utils.fromWei(prod.cost,'ether')
           products.push(
-            <div key={p} className="content bridge row">
-              <div className="col-12 p-1">
-                <button className="btn btn-large w-100"
-                  onClick={()=>{
-                    console.log(prod.id,prod.name,prod.cost,prod.isAvailable)
-                    let currentAmount = this.state.amount
-                    if(currentAmount) currentAmount+=parseFloat(costInDollars)
-                    else currentAmount = parseFloat(costInDollars)
-                    if(currentAmount!=this.state.amount){
-                      this.setState({amount:currentAmount})
-                    }
-                  }}
-                  style={this.props.buttonStyle.secondary}>
-                  <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                    {this.props.web3.utils.hexToUtf8(prod.name)} {this.props.dollarDisplay(costInDollars)}
-                  </Scaler>
-                </button>
-              </div>
-            </div>
-          )
+            <Box key={p} mb={2}>
+              <Button
+                width={1}
+                onClick={() => {
+                  let currentAmount = this.state.amount;
+                  if (currentAmount) currentAmount += parseFloat(costInDollars);
+                  else currentAmount = parseFloat(costInDollars);
+                  if (currentAmount !== this.state.amount) {
+                    this.setState({ amount: currentAmount });
+                  }
+                }}
+              >
+                <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                  {this.props.web3.utils.hexToUtf8(prod.name)} {this.props.dollarDisplay(costInDollars)}
+                </Scaler>
+              </Button>
+            </Box>
+          );
         }
 
       }
     }
     if(products.length>0){
       products.push(
-        <div key={"reset"} className="content bridge row">
-          <div className="col-12 p-1">
-            <button className="btn btn-large w-100"
-              onClick={()=>{
-                this.setState({amount:""})
-              }}
-              style={this.props.buttonStyle.secondary}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                Reset
-              </Scaler>
-            </button>
-          </div>
-        </div>
-      )
+        <Box key="reset" mb={2}>
+          <Button width={1} onClick={() => { this.setState({ amount: "" }); }}>
+            <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+              Reset
+            </Scaler>
+          </Button>
+        </Box>
+      );
     }
 
     return (
-      <div>
-          <div className="content row">
-            <div className="form-group w-100">
-              <div className="form-group w-100">
-                <label htmlFor="amount_input">{i18n.t('withdraw_from_private.from_address')}</label>
-                <Input
-                  width={1}
-                  type="text"
-                  placeholder="0x..."
-                  value={fromAddress} />
-              </div>
+      <Box>
+        <Field label={i18n.t('withdraw_from_private.from_address')} mb={3}>
+          <Input type="text" placeholder="0x..." value={fromAddress} width={1} />
+        </Field>
 
-              <div className="content bridge row">
-                  <div className="col-6 p-1 w-100">
-                    { <Blockies seed={fromAddress} scale={10} /> }
-                  </div>
-                  <div className="col-6 p-1 w-100">
-                    <div style={{fontSize:64,letterSpacing:-2,fontWeight:500,whiteSpace:"nowrap"}}>
-                      <Scaler config={{startZoomAt:1000,origin:"0% 50%"}}>
-                        ${this.state.fromBalance}
-                      </Scaler>
-                    </div>
-                  </div>
-              </div>
+        <Flex alignItems="center" mb={3}>
+          <Box width={1 / 2}>
+            <Blockies seed={fromAddress} scale={10} />
+          </Box>
+          <Box width={1 / 2}>
+            <Box style={{ fontSize: 64, letterSpacing: -2, fontWeight: 500, whiteSpace: "nowrap" }}>
+              <Scaler config={{ startZoomAt: 1000, origin: "0% 50%" }}>
+                ${this.state.fromBalance}
+              </Scaler>
+            </Box>
+          </Box>
+        </Flex>
 
-              <label htmlFor="amount_input">{i18n.t('withdraw_from_private.amount')}</label>
-              <div className="input-group">
-                <Input 
-                  width={1}
-                  type="number"
-                  placeholder="$0.00"
-                  value={this.state.amount}
-                  onChange={event => this.updateState('amount', event.target.value)} />
-              </div>
-              {products}
-            </div>
-            <Button 
-              size={'large'}
-              width={1}
-              disabled={!canWithdraw}
-              onClick={this.withdraw}>
-              {i18n.t('withdraw_from_private.withdraw')}
-            </Button>
-          </div>
-      </div>
-    )
+        <Field label={i18n.t('withdraw_from_private.amount')} mb={3}>
+          <Input
+            width={1}
+            type="number"
+            placeholder="$0.00"
+            value={this.state.amount}
+            onChange={event => this.updateState('amount', event.target.value)}
+          />
+        </Field>
+
+        {products}
+
+        <Button
+          size="large"
+          width={1}
+          disabled={!canWithdraw}
+          onClick={this.withdraw}
+        >
+          {i18n.t('withdraw_from_private.withdraw')}
+        </Button>
+      </Box>
+    );
   }
 }

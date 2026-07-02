@@ -7,6 +7,10 @@ import {
   Button,
   OutlineButton,
   Input,
+  Flex,
+  Box,
+  Text,
+  Card,
   QR as QRCode
 } from 'rimble-ui'
 
@@ -30,58 +34,56 @@ export default class Advanced extends React.Component {
     let qrSize = Math.min(document.documentElement.clientWidth,512)-90
     let qrValue = url+"/#"+privateKey
     let privateKeyQrDisplay = ""
-    if(this.state.privateKeyQr){
+    if (this.state.privateKeyQr) {
       privateKeyQrDisplay = (
-        <div className="main-card card w-100">
-          <div className="content qr row">
-            <QRCode value={qrValue} size={qrSize}/>
-          </div>
-        </div>
-      )
+        <Card width={1}>
+          <Flex flexDirection="column" alignItems="center" p={3}>
+            <QRCode value={qrValue} size={qrSize} renderAs="svg" />
+          </Flex>
+        </Card>
+      );
     }
 
-    let showingQr = ""
-    if(this.state.showingQr){
+    let showingQr = "";
+    if (this.state.showingQr) {
       showingQr = (
-        <div className="main-card card w-100">
-          <div className="content qr row">
-            <QRCode value={this.state.showingQr} size={qrSize}/>
-          </div>
-        </div>
-      )
+        <Card width={1} mt={3}>
+          <Flex flexDirection="column" alignItems="center" p={3}>
+            <QRCode value={this.state.showingQr} size={qrSize} renderAs="svg" />
+          </Flex>
+        </Card>
+      );
     }
 
+    let inputPrivateEyeButton = null;
+    let inputPrivateWidth = 4 / 12;
 
-    let inputPrivateEyeButton = ""
-    let inputPrivateSize = "col-4 p-1"
-
-    if(this.state.newPrivateKey){
+    if (this.state.newPrivateKey) {
       inputPrivateEyeButton = (
-        <div className="col-2 p-1">
-          <Button onClick={()=>{this.setState({privateKeyHidden:!this.state.privateKeyHidden})}}>
+        <Box width={2 / 12} px={2}>
+          <Button width={1} onClick={() => { this.setState({ privateKeyHidden: !this.state.privateKeyHidden }); }}>
             <i className="fas fa-eye"></i>
           </Button>
-        </div>
-      )
-    }else{
-      inputPrivateSize = "col-6 p-1"
+        </Box>
+      );
+    } else {
+      inputPrivateWidth = 6 / 12;
     }
 
     let inputPrivateKeyRow = (
-      <div className="content ops row">
-        <div className={inputPrivateSize}>
+      <Flex alignItems="center" mx={-2}>
+        <Box width={inputPrivateWidth} px={2}>
           <Input
-            type={this.state.privateKeyHidden?"password":"text"}
+            type={this.state.privateKeyHidden ? "password" : "text"}
             autocorrect="off"
             autocapitalize="none"
-            className="form-control"
             placeholder="private key"
-            value={this.state.newPrivateKey}
-            onChange={event => this.setState({newPrivateKey:event.target.value})}
+            value={this.state.newPrivateKey || ''}
+            onChange={event => this.setState({ newPrivateKey: event.target.value })}
           />
-        </div>
+        </Box>
         {inputPrivateEyeButton}
-        <div className="col-6 p-1">
+        <Box width={6 / 12} px={2}>
           <Button width={1} onClick={()=>{
                     console.log(this.state.newPrivateKey)
                     if(this.state && this.state.newPrivateKey && this.state.newPrivateKey.length>=64&&this.state.newPrivateKey.length<=66){
@@ -101,41 +103,39 @@ export default class Advanced extends React.Component {
               <i className="fas fa-plus-square"/> {i18n.t('create')}
             </Scaler>
           </Button>
-        </div>
-      </div>
-    )
+        </Box>
+      </Flex>
+    );
 
+    let inputSeedEyeButton = null;
+    let inputSeedWidth = 4 / 12;
 
-    let inputSeedEyeButton = ""
-    let inputSeedSize = "col-4 p-1"
-
-    if(this.state.newSeedPhrase){
+    if (this.state.newSeedPhrase) {
       inputSeedEyeButton = (
-        <div className="col-2 p-1">
-          <Button width={1} onClick={()=>{this.setState({seedPhraseHidden:!this.state.seedPhraseHidden})}}>
+        <Box width={2 / 12} px={2}>
+          <Button width={1} onClick={() => { this.setState({ seedPhraseHidden: !this.state.seedPhraseHidden }); }}>
             <i className="fas fa-eye"></i>
           </Button>
-        </div>
-      )
-    }else{
-      inputSeedSize = "col-6 p-1"
+        </Box>
+      );
+    } else {
+      inputSeedWidth = 6 / 12;
     }
 
     let inputSeedRow = (
-      <div className="content ops row" style={{paddingTop:10}}>
-        <div className={inputSeedSize}>
+      <Flex alignItems="center" mx={-2} pt={3}>
+        <Box width={inputSeedWidth} px={2}>
           <Input
-            type={this.state.seedPhraseHidden?"password":"text"}
+            type={this.state.seedPhraseHidden ? "password" : "text"}
             autocorrect="off"
             autocapitalize="none"
-            className="form-control"
             placeholder="seed phrase"
-            value={this.state.newSeedPhrase}
-            onChange={event => this.setState({newSeedPhrase:event.target.value})}
+            value={this.state.newSeedPhrase || ''}
+            onChange={event => this.setState({ newSeedPhrase: event.target.value })}
           />
-        </div>
+        </Box>
         {inputSeedEyeButton}
-        <div className="col-6 p-1">
+        <Box width={6 / 12} px={2}>
           <Button width={1} onClick={()=>{
                     if(!this.state.newSeedPhrase){
                       changeAlert({type: 'warning', message: 'Invalid seed phrase.'})
@@ -150,143 +150,114 @@ export default class Advanced extends React.Component {
               <i className="fas fa-plus-square"/> {i18n.t('create')}
             </Scaler>
           </Button>
-        </div>
-      </div>
-    )
+        </Box>
+      </Flex>
+    );
 
     return (
-      <div style={{marginTop:20}}>
+      <Box mt={4}>
+        <Box>
+          <Text textAlign="center" width={1} fontWeight="bold">Learn More</Text>
+          <Flex mx={-2} mb={3} mt={3}>
+            <Box width={1 / 2} px={2}>
+              <a href="https://github.com/austintgriffith/burner-wallet" style={{ color: "#FFFFFF" }} target="_blank" rel="noopener noreferrer">
+                <OutlineButton width={1}>
+                  <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                    <i className="fas fa-code" /> {i18n.t('code')}
+                  </Scaler>
+                </OutlineButton>
+              </a>
+            </Box>
+            <Box width={1 / 2} px={2}>
+              <a href="https://medium.com/gitcoin/ethereum-in-emerging-economies-b235f8dac2f2" style={{ color: "#FFFFFF" }} target="_blank" rel="noopener noreferrer">
+                <OutlineButton width={1}>
+                  <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                    <i className="fas fa-info" /> {i18n.t('about')}
+                  </Scaler>
+                </OutlineButton>
+              </a>
+            </Box>
+          </Flex>
+        </Box>
 
-      <div>
-        <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
-        <div className="content ops row" style={{marginBottom:10}}>
-          <div className="col-6 p-1">
-            <a href="https://github.com/austintgriffith/burner-wallet" style={{color:"#FFFFFF"}} target="_blank">
-              <OutlineButton width={1}>
-                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                  <i className="fas fa-code"/> {i18n.t('code')}
-                </Scaler>
-              </OutlineButton>
-            </a>
-          </div>
-          <div className="col-6 p-1">
-            <a href="https://medium.com/gitcoin/ethereum-in-emerging-economies-b235f8dac2f2" style={{color:"#FFFFFF"}} target="_blank">
-              <OutlineButton width={1}>
-                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                  <i className="fas fa-info"/> {i18n.t('about')}
-                </Scaler>
-              </OutlineButton>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <hr style={{paddingTop:20}}/>
-
-
+        <hr style={{ paddingTop: 20 }} />
 
         {privateKey && !isVendor &&
-        <div>
-                    <div style={{width:"100%",textAlign:"center"}}><h5>Private Key</h5></div>
-          <div className="content ops row" style={{marginBottom:10}}>
-
-            <div className="col-6 p-1">
-            <Button width={1} onClick={()=>{
-              this.setState({privateKeyQr:!this.state.privateKeyQr})
-            }}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <i className="fas fa-key"/> {i18n.t('show')}
-              </Scaler>
-            </Button>
-            </div>
-
-            <CopyToClipboard text={privateKey}>
-              <div className="col-6 p-1"
-                   onClick={() => changeAlert({type: 'success', message: 'Private Key copied to clipboard'})}>
-                <Button width={1}>
-                  <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                    <i className="fas fa-key"/> {i18n.t('copy')}
+          <Box>
+            <Text textAlign="center" width={1} fontWeight="bold">Private Key</Text>
+            <Flex mx={-2} mb={3} mt={3}>
+              <Box width={1 / 2} px={2}>
+                <Button width={1} onClick={() => { this.setState({ privateKeyQr: !this.state.privateKeyQr }); }}>
+                  <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                    <i className="fas fa-key" /> {i18n.t('show')}
                   </Scaler>
                 </Button>
-              </div>
-            </CopyToClipboard>
-
-          </div>
-          <div className="content ops row">
+              </Box>
+              <CopyToClipboard text={privateKey}>
+                <Box width={1 / 2} px={2} onClick={() => changeAlert({ type: 'success', message: 'Private Key copied to clipboard' })}>
+                  <Button width={1}>
+                    <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                      <i className="fas fa-key" /> {i18n.t('copy')}
+                    </Scaler>
+                  </Button>
+                </Box>
+              </CopyToClipboard>
+            </Flex>
             {privateKeyQrDisplay}
-          </div>
-
-        </div>
+          </Box>
         }
 
         {privateKey &&
-        <div>
-          <div className="content ops row" >
-            <div className="col-12 p-1">
-              <Button width={1} onClick={()=>{
-                console.log("BALANCE",balance)
-                changeView('burn-wallet')
-              }}>
-                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                  <i className="fas fa-fire"/> {i18n.t('burn')}
+          <Box>
+            <Box px={2}>
+              <Button width={1} onClick={() => { changeView('burn-wallet'); }}>
+                <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                  <i className="fas fa-fire" /> {i18n.t('burn')}
                 </Scaler>
               </Button>
-            </div>
-          </div>
-          <hr style={{paddingTop:20}}/>
-        </div>}
+            </Box>
+            <hr style={{ paddingTop: 20 }} />
+          </Box>
+        }
 
-
-        <div style={{width:"100%",textAlign:"center"}}><h5>Create Account</h5></div>
-
+        <Text textAlign="center" width={1} fontWeight="bold">Create Account</Text>
         {inputPrivateKeyRow}
-
         {inputSeedRow}
 
-        <hr style={{paddingTop:20}}/>
-        <div style={{width:"100%",textAlign:"center"}}><h5>Extra Tools</h5></div>
+        <hr style={{ paddingTop: 20 }} />
+        <Text textAlign="center" width={1} fontWeight="bold">Extra Tools</Text>
 
-        <div className="content ops row">
-          <div className="col-6 p-1">
+        <Flex mx={-2} mt={3}>
+          <Box width={1 / 2} px={2}>
             <Input
               type="text"
               autocorrect="off"
               autocapitalize="none"
-              className="form-control"
               placeholder="any text to encode"
-              value={this.state.newQr}
-              onChange={event => this.setState({newQr:event.target.value})}
+              value={this.state.newQr || ''}
+              onChange={event => this.setState({ newQr: event.target.value })}
             />
-          </div>
-          <div className="col-6 p-1">
-            <Button width={1} onClick={()=>{
-              this.setState({showingQr:this.state.newQr})
-            }}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <i className="fas fa-qrcode"/> {i18n.t('advanced.to_qr')}
+          </Box>
+          <Box width={1 / 2} px={2}>
+            <Button width={1} onClick={() => { this.setState({ showingQr: this.state.newQr }); }}>
+              <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                <i className="fas fa-qrcode" /> {i18n.t('advanced.to_qr')}
               </Scaler>
             </Button>
-          </div>
-        </div>
+          </Box>
+        </Flex>
         {showingQr}
 
         {isVendor &&
-        <div>
-          <div className="content ops row" style={{marginBottom:10}}>
-            <div className="col-12 p-1">
-              <Button width={1} onClick={()=>{
-                this.props.changeView("exchange")
-              }}>
-                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                  <i className="fas fa-key"/> {"Exchange"}
-                </Scaler>
-              </Button>
-            </div>
-          </div>
-        </div>
+          <Box px={2} mt={3}>
+            <Button width={1} onClick={() => { this.props.changeView("exchange"); }}>
+              <Scaler config={{ startZoomAt: 400, origin: "50% 50%" }}>
+                <i className="fas fa-key" /> Exchange
+              </Scaler>
+            </Button>
+          </Box>
         }
-
-      </div>
-    )
+      </Box>
+    );
   }
 }
